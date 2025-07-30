@@ -3,7 +3,7 @@
 A fun little video game in Python. Because unity is slow.
 
 ## progress log, '25
-#### Jul 29 - 
+#### Jul 29 - v0.0.1 'Voodoo'
 So far, a lot of the preliminary art is in place. 
 So far Santa's sleigh-bombers are spawned via spacebar. 
 Clicking on airbases will spawn an interceptor. 
