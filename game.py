@@ -8,7 +8,7 @@ screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Ahoy World")
 
 #bg init? is there a better way
-bg = pygame.image.load("map2.png")
+bg = pygame.image.load("imgs/map2.png")
 bgScaleFactor = 2.5
 bgScaleX = bg.get_width() * bgScaleFactor
 bgScaleY = bg.get_height() * bgScaleFactor
@@ -28,7 +28,7 @@ class Bomber(pygame.sprite.Sprite):
     def __init__(self, x, y, targX, targY, scaleX, scaleY, spd):
         pygame.sprite.Sprite.__init__(self)
         # img setup and scale
-        original_image = pygame.image.load("sleigh2.png").convert_alpha()
+        original_image = pygame.image.load("imgs/sleigh2.png").convert_alpha()
         self.scaleX = int(scaleX * original_image.get_width())
         self.scaleY = int(scaleY * original_image.get_height())
         scaled_image = pygame.transform.scale(original_image, (self.scaleX, self.scaleY))
@@ -43,7 +43,7 @@ class Bomber(pygame.sprite.Sprite):
             self.direction = pygame.Vector2(1, 0)
         
         # Calculate angle from (x, y) to (targX, targY)
-        # atan2 expects (y, x), and pygame's y-axis is downward
+        # at*n2 expects (y, x), and pygame's y-axis is downward
         dx = self.targetPos.x - self.initPos.x
         dy = self.targetPos.y - self.initPos.y
         angle = -math.degrees(math.atan2(dy, dx))
@@ -58,7 +58,7 @@ class Bomber(pygame.sprite.Sprite):
 class Target(pygame.sprite.Sprite):
     def __init__(self,hp,scale):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("city.png")
+        self.image = pygame.image.load("imgs/city.png")
         self.rect = self.image.get_rect()
         self.rect.x = targetX
         self.rect.y = targetY
@@ -78,7 +78,7 @@ targetY = 350
 class Airbase(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("airbase.png")
+        self.image = pygame.image.load("imgs/airbase.png")
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -90,13 +90,15 @@ class Airbase(pygame.sprite.Sprite):
         self.id = "Airbase"
 
 class Interceptor(pygame.sprite.Sprite):
-    def __init__(self, x, y, scale, spd):
+    def __init__(self, x, y, scale, spd, base):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("hornet2.png")
+        self.image = pygame.image.load("imgs/hornet2-1.png")
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.rect = self.image.get_rect(center=(x, y))  # Use center!
 
+        self.pos = pygame.Vector2(self.rect.center) 
         self.spd = spd
 
         self.scaleX = int(scale * self.image.get_width())
@@ -104,6 +106,12 @@ class Interceptor(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (self.scaleX, self.scaleY))
 
         self.id = "Interceptor"
+        self.homeBase = base
+
+        self.hasATarget = False
+        self.shouldRTB = False
+        self.hasRotated = False #TODO make camel case probably
+
 
 
 #list of all sprites
@@ -118,13 +126,70 @@ hasABomber = False
 running = True
 weJustLost = False
 
+
+def spawnInterceptor(airbase):
+    newInterceptor = Interceptor(
+                            x = airbase.rect.centerx,
+                            y = airbase.rect.centery,
+                            scale = 0.5, 
+                            spd = 40,
+                            base = airbase
+                            )
+    sprites.add(newInterceptor)
+    print("new interceptor at ", clickPos)
+
+def findClosestTarget(interceptor):
+    closest_bomber = None
+    closest_distance = float('inf')
+    for bomber in sprites:
+        if bomber.id == "Bomber":
+            distance = interceptor.rect.centerx - bomber.rect.centerx
+            if abs(distance) < closest_distance:
+                closest_distance = abs(distance)
+                closest_bomber = bomber
+    return closest_bomber
+
+def ReturnToBase(interceptor): # sadly this is called every single frame. Too bad!
+
+    # print("interceptor reached bomber")
+    direction = pygame.Vector2(
+                                interceptor.homeBase.rect.centerx - interceptor.rect.centerx,
+                                interceptor.homeBase.rect.centery - interceptor.rect.centery
+                                )
+    
+    distance = direction.length()
+    print("should rt base active")
+
+    if interceptor.hasRotated == False:
+        angle = -90-math.degrees(math.atan2(direction.y, direction.x))
+        interceptor.image = pygame.transform.rotate(interceptor.image, 0)
+        interceptor.image = pygame.transform.rotate(interceptor.image, angle)
+        interceptor.hasRotated = True
+        print("rotating to base")
+        #TODO fix this stuff!!!!! doesn't work :((
+    
+    if distance > 2: #not at bomber, move to it
+        print("move to base")
+        direction = direction.normalize() 
+        move_dist = min(interceptor.spd * dt, distance)  
+        interceptor.pos += direction * move_dist
+        interceptor.rect.center = int(interceptor.pos.x), int(interceptor.pos.y)
+    # rotate interceptor to face bomber only once, when it starts moving toward a bomber
+    
+    else:
+        sprites.remove(interceptor)
+        print("interceptor returned to base")
+
+  
+
+
 while running:
     
     #for time.deltatime
     clock = pygame.time.Clock()
     dt = clock.tick(60) / 1000.0
 
-    #stop condition
+    #stop condition and actually, every event is handled here
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -149,35 +214,21 @@ while running:
             if event.button == 1:
                 clickPos = pygame.mouse.get_pos()
                 print("click at ", clickPos)
-                if airbase1.rect.collidepoint(clickPos):
-                    print("airbase 1 clicked")
-                    #interceptor spawn
-                    newInterceptor = Interceptor(
-                        x = clickPos[0], 
-                        y = clickPos[1], 
-                        scale = 0.5, 
-                        spd = 100
-                        )
-                    sprites.add(newInterceptor)
-                    print("new interceptor at ", clickPos)
                 
-                else: 
-                    if airbase2.rect.collidepoint(clickPos):
-                        print("airbase 2 clicked")
-                    #interceptor spawn
-                        newInterceptor = Interceptor(
-                        x = clickPos[0]+16, 
-                        y = clickPos[1]+16, 
-                        scale = 0.5, 
-                        spd = 100
-                        )
-                        sprites.add(newInterceptor)
-                        print("new interceptor at ", clickPos)
+                if  len([sprite for sprite in sprites if sprite.id == "Bomber"]) > 0: #more than 1 bomber?
+                    if airbase1.rect.collidepoint(clickPos):
+                        print("airbase 1 clicked")
+                        spawnInterceptor(airbase1)            
+        
+                    elif  airbase2.rect.collidepoint(clickPos):
+                            print("airbase 2 clicked")
+                            spawnInterceptor(airbase2)
                     else:
-                        print("no airbase clicked, no interceptor spawned")
+                        print("enemy bomber airborne BUT no airbase clicked, no interceptor spawned")
                 
-
-                
+                else:
+                    print("no enemy bombers airborne, no interceptor spawned")
+ 
     
     #here begins the while running step of the code.
     #a black bg
@@ -211,7 +262,7 @@ while running:
            
             if distance > 0:
                 direction = direction.normalize()
-                move_dist = min(bomber.spd * dt, distance)  # assuming 60 FPS
+                move_dist = min(bomber.spd * dt, distance)
                 bomber.initPos += direction * move_dist
                 bomber.rect.x, bomber.rect.y = int(bomber.initPos.x), int(bomber.initPos.y)
 
@@ -226,58 +277,68 @@ while running:
                     weJustLost = True
                     for sprite in sprites:
                         if sprite.id =="Target":
-                            sprite.image = pygame.image.load("bombedcity.png")
+                            sprite.image = pygame.image.load("imgs/bombedcity.png")
     
-
+    #interceptor... intercept
     for interceptor in sprites:
+        
         if interceptor.id == "Interceptor":
-            #move interceptor
-            #mouse_x, mouse_y = pygame.mouse.get_pos()
-            #interceptor.rect.x = mouse_x
-            #interceptor.rect.y = mouse_y
+            
+            if not interceptor.hasATarget and len([sprite for sprite in sprites if sprite.id == "Bomber"]) > 0 and not interceptor.shouldRTB:
+                closest_bomber = findClosestTarget(interceptor)
+                interceptor.hasATarget = True
 
-            #find closest bomber
-            closest_bomber = None
-            closest_distance = float('inf')
-            for bomber in sprites:
-                if bomber.id == "Bomber":
-                    distance = interceptor.rect.centerx - bomber.rect.centerx
-                    if abs(distance) < closest_distance:
-                        closest_distance = abs(distance)
-                        closest_bomber = bomber
+               
+            
             #if we have a closest bomber, move towards it
-            if closest_bomber:
+            if interceptor.hasATarget and not interceptor.shouldRTB:
                 direction = pygame.Vector2(closest_bomber.rect.centerx - interceptor.rect.centerx, 
                                            closest_bomber.rect.centery - interceptor.rect.centery
                                            )
                 
                 distance = direction.length()
                 
-                if distance > 0:
-                    direction = direction.normalize()
-                    move_dist = min(interceptor.spd * dt, distance)  # assuming 60 FPS
-                    interceptor.rect.x += direction.x * move_dist
-                    interceptor.rect.y += direction.y * move_dist
+                if closest_bomber not in sprites:
+                    interceptor.hasATarget = False
+                    interceptor.hasRotated = False  # Reset rotation state
+
+                    interceptor.shouldRTB = True
+
+                    print("interceptor has no target, rtb now")
+
+
+
+
+                if distance > 2: #not at bomber, move to it
+                    direction = direction.normalize() 
+                    move_dist = min(interceptor.spd * dt, distance)  
+                    interceptor.pos += direction * move_dist
+                    interceptor.rect.center = int(interceptor.pos.x), int(interceptor.pos.y)
                     # rotate interceptor to face bomber only once, when it starts moving toward a bomber
-                    if not hasattr(interceptor, 'has_rotated') or not interceptor.has_rotated:
+                    
+                    
+                    if not interceptor.hasRotated:
                         angle = -math.degrees(math.atan2(direction.y, direction.x))
                         interceptor.image = pygame.transform.rotate(interceptor.image, angle)
-                        interceptor.has_rotated = True
-                else:
-                    #if the interceptor is at the bomber, remove it
-                    print("interceptor reached bomber")
+                        interceptor.hasRotated = True
 
-                    #implement return to base here
+                    if closest_bomber == None:
+                        interceptor.shouldRTB = True
+                        #our bombers gone, go home
+                        print("interceptor has no target, rtb now")
+                
+            if interceptor.shouldRTB:
+                ReturnToBase(interceptor)
+
                     
-
-
-            
             #check for collisions with bombers
             for bomber in sprites:
                 if bomber.id == "Bomber" and interceptor.rect.colliderect(bomber.rect):
-                    print("interceptor hit bomber")
+                    print("interceptor hit bomber, rtb now")
                     sprites.remove(bomber)
-                    sprites.remove(interceptor)
+                    interceptor.shouldRTB = True
+                    interceptor.hasRotated = False  # Reset rotation state
+
                     #add some explosion effect here?
 
     #mousepos
