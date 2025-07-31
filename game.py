@@ -1,5 +1,8 @@
 import pygame
+import random
 import math
+import time
+import threading
 
 pygame.init()
 pygame.font.init()
@@ -118,7 +121,6 @@ class Interceptor(pygame.sprite.Sprite):
 sprites = pygame.sprite.Group()
 hasSetUpHQ = False
 hasSetUpAirbases = False
-hasABomber = False
 
 
 
@@ -158,7 +160,7 @@ def ReturnToBase(interceptor): # sadly this is called every single frame. Too ba
                                 )
     
     distance = direction.length()
-    print("should rt base active")
+    # print("should rt base active")
 
     if interceptor.hasRotated == False:
         angle = -90-math.degrees(math.atan2(direction.y, direction.x))
@@ -169,7 +171,7 @@ def ReturnToBase(interceptor): # sadly this is called every single frame. Too ba
         #TODO fix this stuff!!!!! doesn't work :((
     
     if distance > 2: #not at bomber, move to it
-        print("move to base")
+        # print("move to base")
         direction = direction.normalize() 
         move_dist = min(interceptor.spd * dt, distance)  
         interceptor.pos += direction * move_dist
@@ -181,6 +183,28 @@ def ReturnToBase(interceptor): # sadly this is called every single frame. Too ba
         print("interceptor returned to base")
 
   
+def newBomber():
+    newBomber = Bomber (
+        x = bombSpawnX, 
+        y = bombSpawnY, 
+        targX = targetX, 
+        targY = targetY, 
+        scaleX = bomberScale, 
+        scaleY = bomberScale, 
+        spd = bomberSpd
+    )
+    sprites.add(newBomber)
+    sprites.update()
+    print("new bomber!!")
+
+#wave control variables
+
+waveNumber = 0
+planeDelay = 1.5  # seconds between planes in a wave
+waveDelay = 10 # seconds between waves
+
+
+    
 
 
 while running:
@@ -196,19 +220,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             #TEMP BOMBER SPAWN
             if event.key == pygame.K_SPACE:
-                newBomber = Bomber(
-                    x = bombSpawnX, 
-                    y = bombSpawnY, 
-                    targX = targetX, 
-                    targY = targetY, 
-                    scaleX = bomberScale, 
-                    scaleY = bomberScale, 
-                    spd = bomberSpd
-                    )
-                sprites.add(newBomber)
-                sprites.update()
-                hasBomber = True
-                print("new bomber!!")
+               newBomber()
         #CLICK CHECK - TEMP INTERCEPTOR SPAWN
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
@@ -237,6 +249,29 @@ while running:
     #bg image of canada
     screen.blit(bg, (0,0))
     
+    #BOMBER SPAWNER CODE
+    # Use these to control wave spawning
+    if not hasattr(pygame, "wave_thread_started"):
+        pygame.wave_thread_started = False
+        pygame.next_wave_time = time.time()
+
+    def bomber_wave_spawner():
+        global waveNumber
+        while running and not weJustLost:
+            waveNumber += 1
+            if not weJustLost:
+                for _ in range(waveNumber + random.randint(0, 2)):
+                    newBomber()
+                    time.sleep(planeDelay)
+                time.sleep(waveDelay)
+            else:
+                break
+
+    # Start the wave spawner thread only once
+    if not pygame.wave_thread_started:
+        wave_thread = threading.Thread(target=bomber_wave_spawner, daemon=True)
+        wave_thread.start()
+        pygame.wave_thread_started = True
 
     #target init
     if not hasSetUpHQ:
@@ -273,7 +308,7 @@ while running:
                 print("took hit! hp = " + str(NoradHQ.hp))
                 if NoradHQ.hp <= 0:
                     print("you dead man!")
-                    text_surface = font.render("The last bastion of humanity burns in a nuclear inferno. \n Santa is victorious.", 0, text_color)
+                    text_surface = font.render("The last bastion of humanity burns in a nuclear inferno. \n\n Santa is victorious. \n You survived " + str(waveNumber) + " waves.", 0, text_color)
                     weJustLost = True
                     for sprite in sprites:
                         if sprite.id =="Target":
@@ -304,7 +339,7 @@ while running:
 
                     interceptor.shouldRTB = True
 
-                    print("interceptor has no target, rtb now")
+                    print("interceptor has no target, RTBing now")
 
 
 
@@ -344,7 +379,7 @@ while running:
     #mousepos
     if not weJustLost:
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        text_surface = font.render("Mouse X: " + str(mouse_x) + ", Y: " + str(mouse_y), 0, text_color)
+        text_surface = font.render("Mouse X: " + str(mouse_x) + ", Y: " + str(mouse_y) + ", Wave: " + str(waveNumber), 0, text_color )
     
     
     
