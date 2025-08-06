@@ -35,5 +35,19 @@ TODO - WOW, rotations are really messed up. Not only are they spinning totally t
 TODO - Limit to 2 interceptors in the air at any time from an airbase.
 TODO - open stores letting you buy more planes. 
 #### XXX ?? - v0.0.3 - 'Republic'
+- finally fixed rotations for the last time. fingers crossed! knock on wood!
+- fixed(?) the game not checking for mouse clicks when bomber spawn loop running? something weird was happening, I made a change, something weird stopped happening. 
+-  number of interceptors in air now limited to 2 from each base.
+
+TODO - upgrade bases: +1 max fighter for 3 TP.
+TODO - more randomness in enemy variables
+TODO - airbases as valid military targets, repairing hp (can't repair base though)
+
+Fun fact: offscreen I've drafted the UI!
+TODO - implement AI changes (may take awhile) 
+
+TODO - make look cool with UI!
+
+TODO - fighter turn around time
 #### XXX ?? - v0.0.4 - 'Starfighter'
 
