@@ -20,7 +20,7 @@ TODO - rework collisions?
 TODO - make rotations work better?
 TODO - game loop currently doesn't exist. Not really much of a game right now.
 
-#### Jul 30 - v0.0.1b
+##### Jul 30 - v0.0.1b
 - Bombers spawn in waves, waves stop when you run out of HP.
 
 TODO - rework interceptors so they can take out more than one plane at a time?
@@ -34,20 +34,28 @@ TODO - restart game function
 TODO - WOW, rotations are really messed up. Not only are they spinning totally the wrong way they may be getting further away from the actual sprite rect? - fix ASAP!!!
 TODO - Limit to 2 interceptors in the air at any time from an airbase.
 TODO - open stores letting you buy more planes. 
-#### XXX ?? - v0.0.3 - 'Republic'
+#### Aug 06 - v0.0.3 - 'Republic'
 - finally fixed rotations for the last time. fingers crossed! knock on wood!
 - fixed(?) the game not checking for mouse clicks when bomber spawn loop running? something weird was happening, I made a change, something weird stopped happening. 
 -  number of interceptors in air now limited to 2 from each base.
-
 TODO - upgrade bases: +1 max fighter for 3 TP.
 TODO - more randomness in enemy variables
-TODO - airbases as valid military targets, repairing hp (can't repair base though)
+
+TODO - airbases as valid military targets 
+TODO - give airbases HP and repair ability
+
+TODO - fighter turn around time (3s?)
 
 Fun fact: offscreen I've drafted the UI!
-TODO - implement AI changes (may take awhile) 
+TODO - implement UI changes (may take awhile) 
 
-TODO - make look cool with UI!
+##### Aug 07 - 0.0.3b
+- Bases can now be upgraded for a cost of 3 TP with Q and E keys respectively
 
-TODO - fighter turn around time
+TODO - all of the above, wow, that's a lot
+TODO - text dialogs for events, errors, etc.
+TODO - main menu music done, now just make a menu!
+
+
 #### XXX ?? - v0.0.4 - 'Starfighter'
 

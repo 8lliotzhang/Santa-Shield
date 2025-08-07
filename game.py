@@ -1,3 +1,22 @@
+# BY ELLIOT ZHANG
+# YOU CAN MODIFY, REDISTRIBUTE, USE, WHATEVER TO MY CODE
+# AS LONG AS YOU ARE A PRIVATE INDIVIDUAL AND NOT ACTING AS PART OF ANY CORPORATE, GOVERNMENT, LEGAL, BUSINESS, OR OTHER ENTITY (COLLLECTIVELY "OTHER ENTITIES")
+# THIS PROGRAM NOT TO BE USED FOR EVIL OF ANY KIND, MALWARE, PROPAGANDA, OR PROFIT IN EXCESS OF 1000 $CAD A MONTH BY PRIVATE INDIVIDUALS (1 $CAD A YEAR FOR ALL OTHER ENTITIES)
+
+# if you plan on open defiance of the above policy:
+#   1) kindly don't
+#   2) advertising includes propaganda. Though I'm open to negotiations if you have the money :-)
+
+# if you do manage to make $12000 a year:
+#   1) congrats!
+#   2) really? you did that with *my* code???
+#   3) please send me, as royalties, the percentage of your earnings equal to the percentage of existing code utilized from my program plus one percent, via e-transfer or mailed cheque, in $CAD.
+
+# I ATTEST THAT THIS SOFTWARE PROBABLY DOESN'T HAVE ANY CRITICAL BUGS AND IS NOT INTENTONALLY MALWARE
+# STILL THOUGH IT IS PROVIDED AS-IS WITH ALL RISKS, INTENTIONAL OR OTHERWISE SO DON'T SUE ME 
+# TODO BUG  
+
+
 import pygame
 import random
 import math
@@ -115,7 +134,7 @@ class Interceptor(pygame.sprite.Sprite):
         self.shouldRTB = False
         self.targetBomber = None
         self.angle = 0
-
+        #builtin rotation
     def rotate_to_target(self, target):
         direction = pygame.Vector2(target[0] - self.pos.x, target[1] - self.pos.y)
         
@@ -138,11 +157,6 @@ sprites = pygame.sprite.Group()
 hasSetUpHQ = False
 hasSetUpAirbases = False
 
-
-
-#setup done?? ok, were starting now
-running = True
-weJustLost = False
 
 #BOMBER SPAWNER CODE
 # Use these to control wave spawning
@@ -198,6 +212,9 @@ def reset_game():
 
 
 
+
+
+#instantiatin interceptors 
 def spawnInterceptor(airbase):
     if airbase.planesReady > 0:
         newInterceptor = Interceptor(
@@ -214,6 +231,7 @@ def spawnInterceptor(airbase):
         print(f"new interceptor at {clickPos}. interceptors remaining is {airbase.planesReady}")
     else:
         print("every plane sortied!!")
+#targeting script for interceptors
 def findClosestTarget(interceptor):
     closest_bomber = None
     closest_distance = float('inf')
@@ -224,7 +242,7 @@ def findClosestTarget(interceptor):
                 closest_distance = abs(distance)
                 closest_bomber = bomber
     return closest_bomber
-
+#going home, going home
 def ReturnToBase(interceptor): # sadly this is called every single frame. Too bad!
     basePos = pygame.Vector2(interceptor.homeBase.rect.center)
     current = pygame.Vector2(interceptor.rect.center)
@@ -257,7 +275,7 @@ def ReturnToBase(interceptor): # sadly this is called every single frame. Too ba
 
         sprites.remove(interceptor)
         print(f"interceptor returned to base. planes ready at {interceptor.homeBase} is now {interceptor.homeBase.planesReady}")
-  
+#the enemy!!!  
 def newBomber():
     newBomber = Bomber (
         x = bombSpawnX, 
@@ -280,19 +298,35 @@ waveDelay = 10 # seconds between waves
 
 global tacPoints 
 tacPoints = 0
-#mousepos
+
+# we wanna deploy
+def upgradeAirbase(airbase, cost):
+    global tacPoints #hey! I wanna modify tacPoints!
+    if tacPoints >= cost:
+        tacPoints -= cost #(modify)
+        airbase.planeLimit += 1
+        airbase.planesReady += 1
 
 
 
 
 
+weJustLost = False
+
+
+#MAKE SURE ALL INIT IS DONE ABOVE!!
+#--------------------
 #BEGIN RUN!!!!
+
+running = True
 while running:
     
     #for time.deltatime
     clock = pygame.time.Clock()
     dt = clock.tick(60) / 1000.0
 
+
+    # ALL INPUT HANDLING GOES HERE I GUESS
     #stop condition and actually, every event is handled here
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -304,6 +338,11 @@ while running:
             #TEMP BOMBER SPAWN
             if event.key == pygame.K_SPACE:
                newBomber()
+            elif event.key ==pygame.K_q:
+                upgradeAirbase(airbase = airbase1,cost=3)
+            elif event.key == pygame.K_e:
+                upgradeAirbase(airbase = airbase2,cost=3)
+
         #CLICK CHECK - TEMP INTERCEPTOR SPAWN
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
