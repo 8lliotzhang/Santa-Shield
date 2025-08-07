@@ -25,7 +25,7 @@ TODO - game loop currently doesn't exist. Not really much of a game right now.
 
 - TODO - rework interceptors so they can take out more than one plane at a time?
 - TODO - restart game function
-#### Aug 05 - v0.0.2 'DeltaDart'
+#### Aug 05 - v0.0.2 'DeltaDagger'
 - Interceptors will now retarget if their original target is gone and they have enough ammo.
 - Interceptors now have more ammunition and will take out 2 sleighs before returning.
 - Game now restarts when you press any key on losing.
