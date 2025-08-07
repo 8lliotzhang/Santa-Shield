@@ -59,5 +59,13 @@ TODO - implement UI changes (may take awhile)
 - TODO - main menu music done, now just make a menu!
 
 
-#### XXX ?? - v0.0.4 - 'Starfighter'
+##### Aug 07 - v0.0.3c
+- enemy missiles now spawn from 0-300 on the x
+- fixed some issues which arose involving targeting and movement and rotations
+- interceptors will now indepenently target and won't target on new interceptor spawns.
+- reworked a lot of stuff, need to save a safe backup now
+
+#### XXX ?? - v0.0.5 - 'Arrow'
+
+#### XXX ?? - v0.0.6 - 'DeltaDart'
 

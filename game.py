@@ -40,11 +40,7 @@ font = pygame.font.SysFont("monospace", 12)
 text_color = (255,255,255)
 
 
-bombSpawnX = 300
-bombSpawnY = 0
 
-bomberScale = .5
-bomberSpd = 50
 
 class Bomber(pygame.sprite.Sprite):
     def __init__(self, x, y, targX, targY, scaleX, scaleY, spd):
@@ -58,11 +54,11 @@ class Bomber(pygame.sprite.Sprite):
         self.initPos = pygame.Vector2(x, y)
         self.targetPos = pygame.Vector2(targX, targY)
         self.spd = spd
-        self.direction = self.targetPos - self.initPos
-        if self.direction.length() != 0:
-            self.direction = self.direction.normalize()
-        else:
-            self.direction = pygame.Vector2(1, 0)
+        #self.direction = self.targetPos - self.initPos
+        #if self.direction.length() != 0:
+        #    self.direction = self.direction.normalize()
+        #else:
+        #    self.direction = pygame.Vector2(1, 0)
         
         # Calculate angle from (x, y) to (targX, targY)
         # at*n2 expects (y, x), and pygame's y-axis is downward
@@ -116,69 +112,54 @@ class Airbase(pygame.sprite.Sprite):
 class Interceptor(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, spd, base, ammo):
         pygame.sprite.Sprite.__init__(self)
+        #image and transforming
         self.original_image = pygame.image.load("imgs/hornet2-1.png").convert_alpha()
         self.scaleX = int(scale * self.original_image.get_width())
         self.scaleY = int(scale * self.original_image.get_height())
         self.original_image = pygame.transform.scale(self.original_image, (self.scaleX, self.scaleY))
-
         self.image = self.original_image.copy()
         
-
+        #rect, ammo, speed
         self.rect = self.image.get_rect(center=(x, y))
         self.ammo = ammo
         self.pos = pygame.Vector2(self.rect.center) 
         self.spd = spd
         self.id = "Interceptor"
-        self.homeBase = base
-        self.hasATarget = False
-        self.shouldRTB = False
-        self.targetBomber = None
-        self.angle = 0
-        #builtin rotation
-    def rotate_to_target(self, target):
-        direction = pygame.Vector2(target[0] - self.pos.x, target[1] - self.pos.y)
         
-        if direction.length() > 0.1:
-            angle_rad = math.atan2(-direction.y, direction.x)
-            new_angle = math.degrees(angle_rad)
-
-            if(new_angle - self.angle) > 1:
+        #home and how to get there
+        self.homeBase = base
+        self.shouldRTB = False
+        
+        self.angle = 0
+        #old targeting
+        self.hasATarget = False
+        self.targetBomber = None
+        self.target_pos = None
+        
+        #newadd
+        self.locked_target = None  # The bomber we're committed to
+        self.target_assigned = False  # Flag for target assignment
+        #builtin rotation
+    
+    def rotate_to_target(self, target):
+        direction = pygame.Vector2(target[0] - self.rect.centerx, target[1] - self.rect.centery)
+        
+        if direction.length() > 0.01:
+            new_angle = math.degrees(math.atan2(-direction.y, direction.x))
+            
+            if abs(new_angle-self.angle) > 1:
                 self.angle = new_angle
-                self.image = pygame.transform.rotate(self.original_image, self.angle)   
-
+                self.image =  pygame.transform.rotate(self.original_image, self.angle)   
+            
                 old_center = self.rect.center
                 self.rect = self.image.get_rect()
                 self.rect.center = old_center     
 
-        
-
 #set up list of all sprites
 sprites = pygame.sprite.Group()
+interceptors = pygame.sprite.Group()
 hasSetUpHQ = False
 hasSetUpAirbases = False
-
-
-#BOMBER SPAWNER CODE
-# Use these to control wave spawning
-if not hasattr(pygame, "wave_thread_started"):
-    pygame.wave_thread_started = False
-    pygame.next_wave_time = time.time()
-
-def bomber_wave_spawner():
-    global waveNumber, tacPoints, weJustLost
-    while running and not weJustLost:
-        waveNumber += 1
-        tacPoints += 1  # Increment tac points for surviving a wave
-        if not weJustLost:
-            for _ in range(waveNumber + random.randint(0, 2)): 
-                # number of bombers is wave + (random int from 0 to 2)
-                newBomber()
-                time.sleep(planeDelay)
-                # delay between each bomber
-            time.sleep(waveDelay)
-            # between each wave
-        else:
-            break
 
 #reset vars
 #umm if you add anything that changes in gamestate you will have to reset it here.
@@ -211,10 +192,7 @@ def reset_game():
     pygame.wave_thread_started = False
 
 
-
-
-
-#instantiatin interceptors 
+#instantiating interceptors 
 def spawnInterceptor(airbase):
     if airbase.planesReady > 0:
         newInterceptor = Interceptor(
@@ -228,42 +206,39 @@ def spawnInterceptor(airbase):
         
         newInterceptor.homeBase.planesReady -= 1
         sprites.add(newInterceptor)
+        interceptors.add(newInterceptor)
         print(f"new interceptor at {clickPos}. interceptors remaining is {airbase.planesReady}")
     else:
         print("every plane sortied!!")
+
 #targeting script for interceptors
 def findClosestTarget(interceptor):
-    closest_bomber = None
-    closest_distance = float('inf')
-    for bomber in sprites:
-        if bomber.id == "Bomber":
-            distance = interceptor.rect.centerx - bomber.rect.centerx
-            if abs(distance) < closest_distance:
-                closest_distance = abs(distance)
-                closest_bomber = bomber
-    return closest_bomber
+    bombers = [s for s in sprites if s.id=="Bomber"]
+    if not bombers:
+        interceptor.locked_target = None
+        interceptor.target_assigned = False
+        return
+    closest = min(bombers, key=lambda b:math.hypot(b.rect.centerx - interceptor.rect.centerx,
+                                         b.rect.centery - interceptor.rect.centery))
+    interceptor.locked_target = closest
+    interceptor.target_assgined = True
+    interceptor.hasATarget = True
+
 #going home, going home
 def ReturnToBase(interceptor): # sadly this is called every single frame. Too bad!
     basePos = pygame.Vector2(interceptor.homeBase.rect.center)
     current = pygame.Vector2(interceptor.rect.center)
+    direction = basePos - current
+    distance = direction.length()
     interceptor.rotate_to_target(basePos)
 
     direction = basePos - current
     distance = direction.length()
     
     if distance > 3: # not at BASE, move to it
-        # print("move to base")
-        angle = math.degrees(math.atan2(-direction.y, direction.x))
-          # 5. Rotate from original image to prevent distortion
-        interceptor.image = pygame.transform.rotate(interceptor.original_image, angle)
-        
-        # 6. Preserve the center position
-        old_center = interceptor.rect.center
-        interceptor.rect = interceptor.image.get_rect()
-        interceptor.rect.center = old_center
-        
-        
-        direction = direction.normalize() 
+
+        if direction.length() > 0:
+            direction = direction.normalize()     
         
         move_dist = min(interceptor.spd * dt, distance)  
         interceptor.pos += direction * move_dist
@@ -271,14 +246,46 @@ def ReturnToBase(interceptor): # sadly this is called every single frame. Too ba
     # rotate interceptor to face BASE only once, when it starts moving toward BASE
     else:
         interceptor.homeBase.planesReady += 1
-        
-
         sprites.remove(interceptor)
+        interceptors.remove(interceptor)
         print(f"interceptor returned to base. planes ready at {interceptor.homeBase} is now {interceptor.homeBase.planesReady}")
-#the enemy!!!  
+
+# managing the enemy!!! 
+# BOMBER SPAWNER CODE
+# Use these to control wave spawning
+if not hasattr(pygame, "wave_thread_started"):
+    pygame.wave_thread_started = False
+    pygame.next_wave_time = time.time()
+def bomber_wave_spawner():
+    global waveNumber, tacPoints, weJustLost
+    while running and not weJustLost:
+        waveNumber += 1
+        tacPoints += 1  # Increment tac points for surviving a wave
+        if not weJustLost:
+            for _ in range(waveNumber + random.randint(0, 2)): 
+                # number of bombers is wave + (random int from 0 to 2)
+                newBomber()
+                time.sleep(planeDelay)
+                # delay between each bomber
+            time.sleep(waveDelay)
+            # between each wave
+        else:
+            break
+#bomber random x pos
+def randomBombX():
+    center = 150
+    range = 150
+    result = center + random.randint(-range, range)
+    print(result)
+    return result
+#other bomber consts:
+bombSpawnY = 0
+bomberScale = .5
+bomberSpd = 50 
+#create the bomber
 def newBomber():
     newBomber = Bomber (
-        x = bombSpawnX, 
+        x = randomBombX(), 
         y = bombSpawnY, 
         targX = targetX, 
         targY = targetY, 
@@ -291,7 +298,6 @@ def newBomber():
     print("new bomber!!")
 
 #wave control variables
-
 waveNumber = 0
 planeDelay = 1.5  # seconds between planes in a wave
 waveDelay = 10 # seconds between waves
@@ -299,15 +305,13 @@ waveDelay = 10 # seconds between waves
 global tacPoints 
 tacPoints = 0
 
-# we wanna deploy
+# we wanna deploy a fighter
 def upgradeAirbase(airbase, cost):
     global tacPoints #hey! I wanna modify tacPoints!
     if tacPoints >= cost:
         tacPoints -= cost #(modify)
         airbase.planeLimit += 1
         airbase.planesReady += 1
-
-
 
 
 
@@ -429,70 +433,54 @@ while running:
                             sprite.image = pygame.image.load("imgs/bombedcity.png")
     
 #interceptor... everything, why is this all one file, why am i doing this
-    for interceptor in sprites:
-        if interceptor.id == "Interceptor":
-                
-                target_pos = None
-                if interceptor.shouldRTB:
-                        target_pos = interceptor.homeBase.rect.center
-                        ReturnToBase(interceptor)
-                        
-                elif interceptor.hasATarget and interceptor.targetBomber:
-                    if interceptor.targetBomber in sprites:
-                        target_pos = interceptor.targetBomber.rect.center
-                    else:
-                        interceptor.hasATarget = False
-                        interceptor.targetBomber = None
+    for interceptor in interceptors:
+        if interceptor.shouldRTB:
+            ReturnToBase(interceptor)
+            continue
+        
+        if not interceptor.target_assigned or interceptor.locked_target not in sprites:
+            findClosestTarget(interceptor)
+       
+        if interceptor.locked_target and interceptor.locked_target in sprites:
+            target_pos = interceptor.locked_target.rect.center
+            direction = pygame.Vector2(target_pos) - interceptor.rect.center
+            distance = direction.length()
             
-                if target_pos:
-                    interceptor.rotate_to_target(target_pos)
+        if distance > 1:
+            #angle = math.degrees(math.atan2(-direction.y, direction.x))
+            #interceptor.image = pygame.transform.rotate(interceptor.original_image, -angle)
+            #interceptor.rect = interceptor.image.get_rect(center=interceptor.rect.center)
+            if direction.length() > 0:
+                direction = direction.normalize()
+                move_angle =  math.degrees(math.atan2(-direction.y, direction.x))
+                interceptor.rotate_to_target(target_pos)
+                
 
-                bombers_exist = any(sprite.id == "Bomber" for sprite in sprites)
-                if not bombers_exist or interceptor.ammo <= 0:
-                    interceptor.shouldRTB = True
-                    interceptor.hasATarget = False  # Clear targeting state
-                
-              
-                if not interceptor.hasATarget and bombers_exist and interceptor.ammo > 0:
-                    closest_bomber = findClosestTarget(interceptor)
-                    if closest_bomber:
-                        interceptor.hasATarget = True
-                        interceptor.targetBomber = closest_bomber  # Store reference to target
+            
+            move_dist = min(interceptor.spd * dt, distance)
+            interceptor.rotate_to_target(target_pos)
+            interceptor.pos += direction.normalize() * move_dist
+            interceptor.rect.center = (interceptor.pos)
+    
+        if interceptor.ammo <= 0:
+            interceptor.shouldRTB = True
+        elif not any(s.id=="Bomber" for s in sprites):
+            interceptor.shouldRTB = True
 
-                if interceptor.hasATarget:
-                    # Check if target still exists
-                    if interceptor.targetBomber not in sprites:
-                        interceptor.hasATarget = False
-                        continue
-                
-                    #MOVEMENT BLOCK
-                    direction = pygame.Vector2(closest_bomber.rect.centerx - interceptor.rect.centerx, 
-                                            closest_bomber.rect.centery - interceptor.rect.centery
-                                            )
-                    distance = direction.length()
-                
-                    if distance > .1: #not at bomber? move to it
-                        direction = direction.normalize() 
-                        move_dist = min(interceptor.spd * dt, distance)  
-                        interceptor.pos += direction * move_dist
-                        interceptor.rect.center = int(interceptor.pos.x), int(interceptor.pos.y)
-                        # rotate interceptor to face bomber only once, when it starts moving toward a bomber
-                        
-                                                 
-                        if closest_bomber == None:
-                            #our bombers gone, go home
-                            print("interceptor has no target, rtb now")
-                                   
-# for some reason this really has to be its own function??? 
-# anyways! handling bomber-interceptor intercepts
-    for interceptor in [sprite for sprite in sprites if sprite.id == "Interceptor"]:
+    
+
+        # now! handling bomber-interceptor intercepts
         for bomber in [sprite for sprite in sprites if sprite.id == "Bomber"]:
-            if interceptor.rect.colliderect(bomber.rect) and interceptor.ammo > 0:
-                print("interceptor hit bomber!")
-                sprites.remove(bomber)
-                interceptor.hasATarget = False
-                interceptor.ammo -= 1
-                print("interceptor ammo left: " + str(interceptor.ammo))
+            if interceptor.rect.colliderect(bomber.rect): 
+                if interceptor.ammo > 0:
+                    interceptor.ammo -= 1
+                    print(f"interceptor hit bomber! ammo:  {interceptor.ammo}")
+                    sprites.remove(bomber)
+                    interceptor.locked_target = None
+                    interceptor.target_assigned = False
+                else:
+                    interceptor.shouldRTB = True
+
         
         #should be handled already...
         # elif interceptor.ammo <= 0:
