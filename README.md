@@ -40,7 +40,9 @@ TODO - open stores letting you buy more planes.
 -  number of interceptors in air now limited to 2 from each base.
 
 TODO - upgrade bases: +1 max fighter for 3 TP.
+
 TODO - more randomness in enemy variables
+
 TODO - airbases as valid military targets, repairing hp (can't repair base though)
 
 Fun fact: offscreen I've drafted the UI!
