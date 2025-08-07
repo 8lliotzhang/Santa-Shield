@@ -39,6 +39,7 @@ TODO - open stores letting you buy more planes.
 - fixed(?) the game not checking for mouse clicks when bomber spawn loop running? something weird was happening, I made a change, something weird stopped happening. 
 -  number of interceptors in air now limited to 2 from each base.
 TODO - upgrade bases: +1 max fighter for 3 TP.
+
 TODO - more randomness in enemy variables
 
 TODO - airbases as valid military targets 
