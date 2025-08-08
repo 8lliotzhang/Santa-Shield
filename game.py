@@ -81,7 +81,9 @@ class Airbase(pygame.sprite.Sprite):
         self.scaleX = int(scale * self.image.get_width())
         self.scaleY = int(scale * self.image.get_height())
         self.image = pygame.transform.scale(self.image, (self.scaleX, self.scaleY))
-
+        
+        self.hp = hp
+        
         self.id = "Airbase"
         self.planeLimit = planeLimit
         self.planesReady = planeLimit
@@ -234,17 +236,20 @@ def ReturnToBase(interceptor): # sadly this is called every single frame. Too ba
         print(f"interceptor returned to base. planes ready at {interceptor.homeBase} is now {interceptor.homeBase.planesReady}")
 
 # managing the enemy!!! 
-
+#targ sel
 def targetSelection():
     targets = [s for s in sprites if s.id=="Airbase" or s.id=="Target"]
     # print(targets) - debug check of targarr - works
-    selectedTarget = targets[random.randint(0,len(targets)-1)]
-    print(selectedTarget)
-    # thing we aim at
-    #create the targetPos vector2 via 
-    targetPos = pygame.Vector2(selectedTarget.rect[0], selectedTarget.rect[1])
-    print(targetPos)
-    return targetPos 
+    try:
+        selectedTarget = targets[random.randint(0,len(targets)-1)]
+        print(selectedTarget)
+        # thing we aim at
+        #create the targetPos vector2 via 
+        targetPos = pygame.Vector2(selectedTarget.rect[0], selectedTarget.rect[1])
+        print(targetPos)
+        return selectedTarget, targetPos 
+    except:
+        print("probably no targs")
 
 class Bomber(pygame.sprite.Sprite):
    
@@ -259,7 +264,8 @@ class Bomber(pygame.sprite.Sprite):
         scaled_image = pygame.transform.scale(original_image, (self.scaleX, self.scaleY))
         
         self.initPos = pygame.Vector2(x, y)
-        self.targetPos = targetSelection()
+        self.target = targetSelection()[0]
+        self.targetPos = targetSelection()[1]
         self.spd = spd
         #self.direction = self.targetPos - self.initPos
         #if self.direction.length() != 0:
@@ -317,16 +323,19 @@ bomberSpd = 50
 
 #create the bomber
 def newBomber():
-    newBomber = Bomber (
-        x = randomBombX(), 
-        y = bombSpawnY, 
-        scaleX = bomberScale, 
-        scaleY = bomberScale, 
-        spd = bomberSpd
-    )
-    sprites.add(newBomber)
-    sprites.update()
-    print("new bomber!!")
+    try:
+        newBomber = Bomber (
+            x = randomBombX(), 
+            y = bombSpawnY, 
+            scaleX = bomberScale, 
+            scaleY = bomberScale, 
+            spd = bomberSpd
+        )
+        sprites.add(newBomber)
+        sprites.update()
+        print("new bomber!!")
+    except:
+        print("eh, prob no targs")
 #
 # END BOMBER STUFF ABOVE
 #
@@ -347,11 +356,9 @@ weJustLost = False
 
 running = True
 while running:
-    
     #for time.deltatime
     clock = pygame.time.Clock()
     dt = clock.tick(60) / 1000.0
-
 
     # ALL INPUT HANDLING GOES HERE I GUESS
     #stop condition and actually, every event is handled here
@@ -389,8 +396,7 @@ while running:
                 
                 else:
                     print("no enemy bombers airborne, no interceptor spawned")
- 
-    
+  
     #here begins the while running step of the code.
     #a black bg
     screen.fill((0,0,0))
@@ -398,8 +404,6 @@ while running:
     #bg image of canada
     screen.blit(bg, (mapX,mapY))
     
-   
-
     # Start the wave spawner thread only once
     if not pygame.wave_thread_started:
         wave_thread = threading.Thread(target=bomber_wave_spawner, daemon=True)
@@ -443,6 +447,7 @@ while running:
             direction = bomber.targetPos - bomber.initPos
             distance = direction.length()
            
+
             if distance > 0:
                 direction = direction.normalize()
                 move_dist = min(bomber.spd * dt, distance)
@@ -450,18 +455,21 @@ while running:
                 bomber.rect.x, bomber.rect.y = int(bomber.initPos.x), int(bomber.initPos.y)
 
             else:
-                sprites.remove(bomber)
+                bomber.target.hp -= 1
+                print(f"new hp of {bomber.target} is {bomber.target.hp}")
                 #killit!!!
-                NoradHQ.hp = NoradHQ.hp - 1 
-                print("took hit! hp = " + str(NoradHQ.hp))
-                if NoradHQ.hp <= 0:
-                    print("you dead man!")
-                    weJustLost = True
-                    
-                    for sprite in sprites:
-                        if sprite.id =="Target":
-                            sprite.image = pygame.image.load("imgs/bombedcity.png")
-    
+                if bomber.target.hp <= 0:
+                    if bomber.target.id !="Target":
+                        #hopefully it wasnt main base right?
+                        sprites.remove(bomber.target)
+                    else:
+                        #oh no!!! It was main base!!!
+                        print("you dead man!")
+                        weJustLost = True
+                        bomber.target.image = pygame.image.load("imgs/bombedcity.png")
+
+                sprites.remove(bomber)
+           
 #interceptor... everything, why is this all one file, why am i doing this
     for interceptor in interceptors:
         if interceptor.shouldRTB:
@@ -536,7 +544,6 @@ while running:
 
         #TP_surface = font.render(f"RDY: {}", True, text_color)
         #screen.blit(TP_surface, (10, 40))
-
 
 #DONT MESS WITH STUFF BELOW 
     #draw all sprites

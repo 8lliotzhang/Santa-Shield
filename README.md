@@ -72,9 +72,7 @@ TODO - implement UI changes (may take awhile)
 ##### Aug 08 - v0.0.3e
 - reworked targeting - bombers now aim for airfields
 - quicksave in case things go bad
-
-
-#### XXX ?? - v0.0.5 - 'Arrow'
-
-#### XXX ?? - v0.0.6 - 'DeltaDart'
+##### Aug 08 - v0.0.3f
+- airbases can be destroyed!
+- added try/except to bomber spawn which would fail when all tgts destroyed.
 
