@@ -50,45 +50,13 @@ ICON = pygame.image.load("imgs/santashield2.png")
 pygame.display.set_icon(ICON)
 
 
-
-class Bomber(pygame.sprite.Sprite):
-    def __init__(self, x, y, targX, targY, scaleX, scaleY, spd):
-        pygame.sprite.Sprite.__init__(self)
-        # img setup and scale
-        original_image = pygame.image.load("imgs/sleigh3.png").convert_alpha()
-        self.scaleX = int(scaleX * original_image.get_width())
-        self.scaleY = int(scaleY * original_image.get_height())
-        scaled_image = pygame.transform.scale(original_image, (self.scaleX, self.scaleY))
-        
-        self.initPos = pygame.Vector2(x, y)
-        self.targetPos = pygame.Vector2(targX, targY)
-        self.spd = spd
-        #self.direction = self.targetPos - self.initPos
-        #if self.direction.length() != 0:
-        #    self.direction = self.direction.normalize()
-        #else:
-        #    self.direction = pygame.Vector2(1, 0)
-        
-        # Calculate angle from (x, y) to (targX, targY)
-        # at*n2 expects (y, x), and pygame's y-axis is downward
-        dx = self.targetPos.x - self.initPos.x
-        dy = self.targetPos.y - self.initPos.y
-        angle = -math.degrees(math.atan2(dy, dx))
-        self.image = pygame.transform.rotate(scaled_image, angle)
-        self.rect = self.image.get_rect(center=(x, y))
-        self.targX = targX
-        self.targY = targY
-
-        #id for cols
-        self.id = "Bomber"
-
 class Target(pygame.sprite.Sprite):
-    def __init__(self,hp,scale):
+    def __init__(self, x, y, scale, hp):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("imgs/city.png")
         self.rect = self.image.get_rect()
-        self.rect.x = targetX
-        self.rect.y = targetY
+        self.rect.x = x
+        self.rect.y = y
         
         self.scaleX = int(scale * self.image.get_width())
         self.scaleY = int(scale * self.image.get_height())
@@ -103,7 +71,7 @@ targetX = 250
 targetY = 400
 
 class Airbase(pygame.sprite.Sprite):
-    def __init__(self, x, y, scale, planeLimit):
+    def __init__(self, x, y, scale, hp, planeLimit):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("imgs/airbase.png")
         self.rect = self.image.get_rect()
@@ -117,6 +85,14 @@ class Airbase(pygame.sprite.Sprite):
         self.id = "Airbase"
         self.planeLimit = planeLimit
         self.planesReady = planeLimit
+
+# we wanna deploy a fighter
+def upgradeAirbase(airbase, cost):
+    global tacPoints #hey! I wanna modify tacPoints!
+    if tacPoints >= cost:
+        tacPoints -= cost #(modify)
+        airbase.planeLimit += 1
+        airbase.planesReady += 1
 
 class Interceptor(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, spd, base, ammo):
@@ -258,6 +234,53 @@ def ReturnToBase(interceptor): # sadly this is called every single frame. Too ba
         print(f"interceptor returned to base. planes ready at {interceptor.homeBase} is now {interceptor.homeBase.planesReady}")
 
 # managing the enemy!!! 
+
+def targetSelection():
+    targets = [s for s in sprites if s.id=="Airbase" or s.id=="Target"]
+    # print(targets) - debug check of targarr - works
+    selectedTarget = targets[random.randint(0,len(targets)-1)]
+    print(selectedTarget)
+    # thing we aim at
+    #create the targetPos vector2 via 
+    targetPos = pygame.Vector2(selectedTarget.rect[0], selectedTarget.rect[1])
+    print(targetPos)
+    return targetPos 
+
+class Bomber(pygame.sprite.Sprite):
+   
+
+    def __init__(self, x, y, scaleX, scaleY, spd):
+        pygame.sprite.Sprite.__init__(self)
+        
+        # img setup and scale
+        original_image = pygame.image.load("imgs/sleigh3.png").convert_alpha()
+        self.scaleX = int(scaleX * original_image.get_width())
+        self.scaleY = int(scaleY * original_image.get_height())
+        scaled_image = pygame.transform.scale(original_image, (self.scaleX, self.scaleY))
+        
+        self.initPos = pygame.Vector2(x, y)
+        self.targetPos = targetSelection()
+        self.spd = spd
+        #self.direction = self.targetPos - self.initPos
+        #if self.direction.length() != 0:
+        #    self.direction = self.direction.normalize()
+        #else:
+        #    self.direction = pygame.Vector2(1, 0)
+    
+        # Calculate angle from (x, y) to (targX, targY)
+        # at*n2 expects (y, x), and pygame's y-axis is downward 
+        dx = self.targetPos.x - self.initPos.x
+        dy = self.targetPos.y - self.initPos.y
+        #angle towards target
+        angle = -math.degrees(math.atan2(dy, dx))
+        self.image = pygame.transform.rotate(scaled_image, angle)
+        self.rect = self.image.get_rect(center=(x, y))
+        
+        #self.targX = targX
+        #self.targY = targY
+        #id for cols
+        self.id = "Bomber"
+    
 # BOMBER SPAWNER CODE
 # Use these to control wave spawning
 if not hasattr(pygame, "wave_thread_started"):
@@ -278,6 +301,7 @@ def bomber_wave_spawner():
             # between each wave
         else:
             break
+
 #bomber random x pos
 def randomBombX():
     center = 150
@@ -285,17 +309,17 @@ def randomBombX():
     result = center + random.randint(-range, range)
     print(result)
     return result
+
 #other bomber consts:
 bombSpawnY = 45
 bomberScale = .5
 bomberSpd = 50 
+
 #create the bomber
 def newBomber():
     newBomber = Bomber (
         x = randomBombX(), 
         y = bombSpawnY, 
-        targX = targetX, 
-        targY = targetY, 
         scaleX = bomberScale, 
         scaleY = bomberScale, 
         spd = bomberSpd
@@ -303,7 +327,9 @@ def newBomber():
     sprites.add(newBomber)
     sprites.update()
     print("new bomber!!")
-
+#
+# END BOMBER STUFF ABOVE
+#
 #wave control variables
 waveNumber = 0
 planeDelay = 1.5  # seconds between planes in a wave
@@ -311,16 +337,6 @@ waveDelay = 10 # seconds between waves
 
 global tacPoints 
 tacPoints = 0
-
-# we wanna deploy a fighter
-def upgradeAirbase(airbase, cost):
-    global tacPoints #hey! I wanna modify tacPoints!
-    if tacPoints >= cost:
-        tacPoints -= cost #(modify)
-        airbase.planeLimit += 1
-        airbase.planesReady += 1
-
-
 
 weJustLost = False
 
@@ -392,24 +408,31 @@ while running:
 
     #target init
     if not hasSetUpHQAndBases:
-        NoradHQ = Target(hp = 3, scale = 1)
+        NoradHQ = Target(
+            x = 250, 
+            y = 400, 
+            hp = 5, 
+            scale = 1)
         sprites.add(NoradHQ)
         
         #oh this is actually really bad... uhh the targetX, Y are about 50 lines up.
-    
-#airbase init
+        #airbase init
         abScale = 0.7
         
         airbase1 = Airbase(
-            x=150, 
-            y=320,
-            scale=abScale, 
-            planeLimit=2)
+            x = 150, 
+            y = 320,
+            scale = abScale, 
+            planeLimit = 2,
+            hp = 3
+        )
         airbase2 = Airbase(
-            x=250, 
-            y=300,
-            scale=abScale,
-            planeLimit=2)
+            x = 250, 
+            y = 300,
+            scale = abScale,
+            planeLimit = 2,
+            hp = 3
+        )
         sprites.add(airbase1)
         sprites.add(airbase2)
         hasSetUpHQAndBases = True

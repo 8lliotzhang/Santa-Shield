@@ -69,6 +69,10 @@ TODO - implement UI changes (may take awhile)
 - game map shifted a lil bit, with a green border
 - text enlarged
 - new logo!
+##### Aug 08 - v0.0.3e
+- reworked targeting - bombers now aim for airfields
+- quicksave in case things go bad
+
 
 #### XXX ?? - v0.0.5 - 'Arrow'
 
