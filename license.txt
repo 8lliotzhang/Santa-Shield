@@ -1,0 +1,41 @@
+AUGUST 2025
+BY ELLIOT ZHANG (HENCEFORTH "I, ME")
+
+1. YOU CAN: 
+    a. MODIFY THE CODE (HENCEFORTH ALSO "THE GAME, MY GAME")
+    b. REDISTRIBUTE THE CODE 
+    c. USE THE CODE IN YOUR PROGRAMMING
+
+2. AS LONG AS:
+    a. YOU ARE A PRIVATE INDIVIDUAL, AND NOT ACTING AS PART OF ANY 
+        i. CORPORATE, 
+        ii. GOVERNMENT, 
+        iii. LEGAL, 
+        iv. BUSINESS, OR OTHER ENTITY (COLLLECTIVELY "OTHER ENTITIES")
+
+3. YOU CANNOT:
+    a. USE THE GAME FOR EVIL OF ANY KIND, INCLUDING BUT NOT LIMITED TO: 
+        i. MALWARE, 
+        ii. PROPAGANDA AND ADVERTISING, MISLEADING OR OTHERWISE 
+        iii. PROFIT IN EXCESS OF ONE THOUSAND (1000) $CAD A MONTH BY PRIVATE INDIVIDUALS
+
+4. if you plan on open defiance of the above policy:
+    a. kindly don't
+    b. understand that advertising falls under propaganda
+    c. I, the CREATOR, reserve the right to pursue ANY AND ALL LEGAL ACTIONS AT MY DISPOSAL TO ENSURE COMPLIANCE WITH THE POLICY AS I, THE CREATOR, SEE FIT
+
+5. if you are NORAD, the USAF, the RCAF, or any other organization or person pursuing legal action:
+    a. all pictures, names, characters, organizations, scenarios, nations, air forces et cetera (henceforth "things"), are a work of fiction.
+    b. any references to any real and existing things are entirely coincidental.
+    c. the above clause excludes Santa, of course. (from henceforth this clause may be referred to as the "Santa Clause".)
+    d. any references to a 1994 film called the "Santa Clause" starring Tim Allen contained within the Santa Clause were actually unintentional.  
+
+6. if you do manage to make $12000 a year with my game:
+    a. congrats!
+    b. really? you did that with *my* code???
+    c. please send me, as royalties, the percentage of your earnings equal to the percentage of existing code utilized from my program plus one (1) percent, via e-transfer or mailed cheque, in $CAD.
+
+7. I ATTEST THAT THIS SOFTWARE PROBABLY DOESN'T HAVE ANY CRITICAL BUGS AND IS NOT INTENTONALLY MALWARE
+
+8. STILL, THOUGH, IT IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+

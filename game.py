@@ -1,21 +1,3 @@
-# BY ELLIOT ZHANG
-# YOU CAN MODIFY, REDISTRIBUTE, USE, WHATEVER TO MY CODE
-# AS LONG AS YOU ARE A PRIVATE INDIVIDUAL AND NOT ACTING AS PART OF ANY CORPORATE, GOVERNMENT, LEGAL, BUSINESS, OR OTHER ENTITY (COLLLECTIVELY "OTHER ENTITIES")
-# THIS PROGRAM NOT TO BE USED FOR EVIL OF ANY KIND, MALWARE, PROPAGANDA, OR PROFIT IN EXCESS OF 1000 $CAD A MONTH BY PRIVATE INDIVIDUALS (1 $CAD A YEAR FOR ALL OTHER ENTITIES)
-
-# if you plan on open defiance of the above policy:
-#   1) kindly don't
-#   2) advertising includes propaganda. Though I'm open to negotiations if you have the money :-)
-
-# if you do manage to make $12000 a year:
-#   1) congrats!
-#   2) really? you did that with *my* code???
-#   3) please send me, as royalties, the percentage of your earnings equal to the percentage of existing code utilized from my program plus one percent, via e-transfer or mailed cheque, in $CAD.
-
-# I ATTEST THAT THIS SOFTWARE PROBABLY DOESN'T HAVE ANY CRITICAL BUGS AND IS NOT INTENTONALLY MALWARE
-# STILL THOUGH IT IS PROVIDED AS-IS WITH ALL RISKS, INTENTIONAL OR OTHERWISE SO DON'T SUE ME 
-# TODO BUG  
-
 
 import pygame
 import random
