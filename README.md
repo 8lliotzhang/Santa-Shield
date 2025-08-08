@@ -65,6 +65,11 @@ TODO - implement UI changes (may take awhile)
 - interceptors will now indepenently target and won't target on new interceptor spawns.
 - reworked a lot of stuff, need to save a safe backup now
 
+##### Aug 08 - v0.0.3d
+- game map shifted a lil bit, with a green border
+- text enlarged
+- new logo!
+
 #### XXX ?? - v0.0.5 - 'Arrow'
 
 #### XXX ?? - v0.0.6 - 'DeltaDart'

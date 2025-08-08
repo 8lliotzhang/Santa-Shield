@@ -27,18 +27,27 @@ pygame.init()
 pygame.font.init()
 #screen and title here
 screen = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Ahoy World")
+pygame.display.set_caption("SANTA SHIELD")
+
 
 #bg init? is there a better way
-bg = pygame.image.load("imgs/map2.png")
+#offset
+mapX, mapY = (20, 40)
+
+bg = pygame.image.load("imgs/newmap.png")
 bgScaleFactor = 2.5
 bgScaleX = bg.get_width() * bgScaleFactor
 bgScaleY = bg.get_height() * bgScaleFactor
 bg = pygame.transform.scale(bg,(bgScaleX,bgScaleY))
 
-font = pygame.font.SysFont("monospace", 12)
+bgRect = bg.get_rect()
+pygame.draw.rect(bg, (0,255,0), bgRect, 2)
+
+font = pygame.font.SysFont("monospace", 16)
 text_color = (255,255,255)
 
+ICON = pygame.image.load("imgs/santashield2.png")
+pygame.display.set_icon(ICON)
 
 
 
@@ -90,8 +99,8 @@ class Target(pygame.sprite.Sprite):
 
 #targetX = 305
 #targetY = 430
-targetX = 205
-targetY = 350
+targetX = 250
+targetY = 400
 
 class Airbase(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, planeLimit):
@@ -158,21 +167,19 @@ class Interceptor(pygame.sprite.Sprite):
 #set up list of all sprites
 sprites = pygame.sprite.Group()
 interceptors = pygame.sprite.Group()
-hasSetUpHQ = False
-hasSetUpAirbases = False
+hasSetUpHQAndBases = False
 
 #reset vars
 #umm if you add anything that changes in gamestate you will have to reset it here.
 def reset_game():
-    global waveNumber, planeDelay, waveDelay, hasSetUpHQ, hasSetUpAirbases, weJustLost, sprites
+    global waveNumber, planeDelay, waveDelay, hasSetUpHQAndBases, weJustLost, sprites
     global bombSpawnX, bombSpawnY, bomberScale, bomberSpd, targetX, targetY
     global tacPoints
     
     # Reset game state variables
     waveNumber = 0
     weJustLost = False
-    hasSetUpHQ = False
-    hasSetUpAirbases = False
+    hasSetUpHQAndBases = False
     tacPoints = 0
     # Clear all sprites
     sprites.empty()
@@ -279,7 +286,7 @@ def randomBombX():
     print(result)
     return result
 #other bomber consts:
-bombSpawnY = 0
+bombSpawnY = 45
 bomberScale = .5
 bomberSpd = 50 
 #create the bomber
@@ -373,7 +380,7 @@ while running:
     screen.fill((0,0,0))
     
     #bg image of canada
-    screen.blit(bg, (0,0))
+    screen.blit(bg, (mapX,mapY))
     
    
 
@@ -384,28 +391,28 @@ while running:
         pygame.wave_thread_started = True
 
     #target init
-    if not hasSetUpHQ:
+    if not hasSetUpHQAndBases:
         NoradHQ = Target(hp = 3, scale = 1)
         sprites.add(NoradHQ)
-        hasSetUpHQ = True
+        
         #oh this is actually really bad... uhh the targetX, Y are about 50 lines up.
     
 #airbase init
-    if not hasSetUpAirbases:
         abScale = 0.7
+        
         airbase1 = Airbase(
-            x=135, 
-            y=275,
+            x=150, 
+            y=320,
             scale=abScale, 
             planeLimit=2)
         airbase2 = Airbase(
-            x=240, 
-            y=250,
+            x=250, 
+            y=300,
             scale=abScale,
             planeLimit=2)
         sprites.add(airbase1)
         sprites.add(airbase2)
-        hasSetUpAirbases = True
+        hasSetUpHQAndBases = True
 
 #bomber move towards hq
     for bomber in sprites:
@@ -500,9 +507,9 @@ while running:
     # Display wave count and mouse position
         mouse_x, mouse_y = pygame.mouse.get_pos()
         text_surface = font.render(
-            f"WAVE {waveNumber} -- MOUSE: ({mouse_x},{mouse_y}) -- {tacPoints} TP ", True, text_color
+            f"WAVE {waveNumber} -- MOUSE AT ({mouse_x},{mouse_y}) -- {tacPoints} TP ", True, text_color
             )
-        screen.blit(text_surface, (10, 10))
+        screen.blit(text_surface, (20, 20))
 
         #TP_surface = font.render(f"RDY: {}", True, text_color)
         #screen.blit(TP_surface, (10, 40))
