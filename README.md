@@ -76,3 +76,6 @@ TODO - implement UI changes (may take awhile)
 - airbases can be destroyed!
 - added try/except to bomber spawn which would fail when all tgts destroyed.
 
+- TODO fix bug: sometimes thing taking damage isn't thing being hit
+- TODO universal repair function for all possible tgts
+

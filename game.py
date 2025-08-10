@@ -31,7 +31,36 @@ text_color = (255,255,255)
 ICON = pygame.image.load("imgs/santashield2.png")
 pygame.display.set_icon(ICON)
 
+#reset vars
+#umm if you add anything that changes in gamestate you will have to reset it here.
+def reset_game():
+    global waveNumber, planeDelay, waveDelay, hasSetUpHQAndBases, weJustLost, sprites
+    global bombSpawnY, bomberScale, bomberSpd, targetX, targetY
+    global tacPoints
+    
+    # Reset game state variables
+    waveNumber = 0
+    weJustLost = False
+    hasSetUpHQAndBases = False
+    tacPoints = 0
+    # Clear all sprites
+    sprites.empty()
+    
+    # Reset other game variables to their initial values - not that they gonna be changed...
+    #bombSpawnX = 300
+    #bombSpawnY = 0
+    #bomberScale = 0.35
+    #bomberSpd = 50
+    #targetX = 205
+    #targetY = 350
+    # Reset wave timing
+    #planeDelay = 1.5
+    #waveDelay = 10
+    
+    # Reset the wave thread flag
+    pygame.wave_thread_started = False
 
+#the HQ
 class Target(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, hp):
         pygame.sprite.Sprite.__init__(self)
@@ -51,7 +80,7 @@ class Target(pygame.sprite.Sprite):
 #targetY = 430
 targetX = 250
 targetY = 400
-
+#and the launchers
 class Airbase(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, hp, planeLimit):
         pygame.sprite.Sprite.__init__(self)
@@ -128,35 +157,6 @@ class Interceptor(pygame.sprite.Sprite):
 sprites = pygame.sprite.Group()
 interceptors = pygame.sprite.Group()
 hasSetUpHQAndBases = False
-
-#reset vars
-#umm if you add anything that changes in gamestate you will have to reset it here.
-def reset_game():
-    global waveNumber, planeDelay, waveDelay, hasSetUpHQAndBases, weJustLost, sprites
-    global bombSpawnX, bombSpawnY, bomberScale, bomberSpd, targetX, targetY
-    global tacPoints
-    
-    # Reset game state variables
-    waveNumber = 0
-    weJustLost = False
-    hasSetUpHQAndBases = False
-    tacPoints = 0
-    # Clear all sprites
-    sprites.empty()
-    
-    # Reset other game variables to their initial values - not that they gonna be changed...
-    #bombSpawnX = 300
-    #bombSpawnY = 0
-    #bomberScale = 0.35
-    #bomberSpd = 50
-    #targetX = 205
-    #targetY = 350
-    # Reset wave timing
-    #planeDelay = 1.5
-    #waveDelay = 10
-    
-    # Reset the wave thread flag
-    pygame.wave_thread_started = False
 
 
 #instantiating interceptors 
