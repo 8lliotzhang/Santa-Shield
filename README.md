@@ -15,14 +15,14 @@ A fun little video game in Python. Because unity is slow. Below is the premise! 
 - A lot of the preliminary art is in place. 
 - So far Santa's sleigh-bombers are spawned via spacebar. 
 - Clicking on airbases will spawn an interceptor. 
-
+---
 TODO - rework collisions?
 TODO - make rotations work better?
 TODO - game loop currently doesn't exist. Not really much of a game right now.
 
 ##### Jul 30 - v0.0.1b
 - Bombers spawn in waves, waves stop when you run out of HP.
-
+---
 - TODO - rework interceptors so they can take out more than one plane at a time?
 - TODO - restart game function
 #### Aug 05 - v0.0.2 'DeltaDagger'
@@ -30,7 +30,7 @@ TODO - game loop currently doesn't exist. Not really much of a game right now.
 - Interceptors now have more ammunition and will take out 2 sleighs before returning.
 - Game now restarts when you press any key on losing.
 - initial implement of tactical points for buying stuff. Can't buy anything yet.
-
+---
 - TODO - WOW, rotations are really messed up. Not only are they spinning totally the wrong way they may be getting further away from the actual sprite rect? -fix ASAP!!!
 - TODO - Limit to 2 interceptors in the air at any time from an airbase.
 - TODO - open stores letting you buy more planes. 
@@ -38,7 +38,7 @@ TODO - game loop currently doesn't exist. Not really much of a game right now.
 - finally fixed rotations for the last time. fingers crossed! knock on wood!
 - fixed(?) the game not checking for mouse clicks when bomber spawn loop running? something weird was happening, I made a change, something weird stopped happening. 
 -  number of interceptors in air now limited to 2 from each base.
-
+---
 TODO - upgrade bases: +1 max fighter for 3 TP.
 TODO - more randomness in enemy variables
 TODO - airbases as valid military targets 
@@ -49,7 +49,7 @@ TODO - implement UI changes (may take awhile)
 
 ##### Aug 07 - 0.0.3b
 - Bases can now be upgraded for a cost of 3 TP with Q and E keys respectively.
-
+---
 - TODO - more randomness in enemy variables
 - TODO - airbases as valid military targets 
 - TODO - give airbases HP and repair ability
@@ -75,7 +75,14 @@ TODO - implement UI changes (may take awhile)
 ##### Aug 08 - v0.0.3f
 - airbases can be destroyed!
 - added try/except to bomber spawn which would fail when all tgts destroyed.
-
+---
 - TODO fix bug: sometimes thing taking damage isn't thing being hit
 - TODO universal repair function for all possible tgts
 
+##### Aug 11 - v0.03g
+- universal repair function added
+- fixed bug mentioned above
+---
+- TODO: barebones, actual UI
+- TODO: add cool sounds here and there
+- TODO: main menu
