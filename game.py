@@ -73,6 +73,9 @@ class Target(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (self.scaleX, self.scaleY))
         
         self.hp = hp
+        self.MAX_HP = hp
+
+
         self.id = "Target"
 
 #targetX = 305
@@ -93,7 +96,8 @@ class Airbase(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (self.scaleX, self.scaleY))
         
         self.hp = hp
-        
+        self.MAX_HP = hp
+
         self.id = "Airbase"
         self.planeLimit = planeLimit
         self.planesReady = planeLimit
@@ -105,6 +109,19 @@ def upgradeAirbase(airbase, cost):
         tacPoints -= cost #(modify)
         airbase.planeLimit += 1
         airbase.planesReady += 1
+
+def repair(facility):
+    global tacPoints
+    cost = 2
+    try:
+        if facility.hp < facility.MAX_HP and tacPoints >= cost:
+            print("success repair")
+            facility.hp += 1
+            tacPoints -= cost
+        else:
+            print("either facility at full health or not enough TP. idk, do better diagnostics")
+    except:
+        print("uh oh, did you call repair() on a thing without hp??")
 
 class Interceptor(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, spd, base, ammo):
@@ -173,7 +190,7 @@ def spawnInterceptor(airbase):
         newInterceptor.homeBase.planesReady -= 1
         sprites.add(newInterceptor)
         interceptors.add(newInterceptor)
-        print(f"new interceptor at {clickPos}. interceptors remaining is {airbase.planesReady}")
+        # print(f"new interceptor at {clickPos}. interceptors remaining is {airbase.planesReady}")
     else:
         print("every plane sortied!!")
 
@@ -223,11 +240,10 @@ def targetSelection():
     # print(targets) - debug check of targarr - works
     try:
         selectedTarget = targets[random.randint(0,len(targets)-1)]
-        print(selectedTarget)
         # thing we aim at
         #create the targetPos vector2 via 
         targetPos = pygame.Vector2(selectedTarget.rect[0], selectedTarget.rect[1])
-        print(targetPos)
+        print(f"tgt {selectedTarget} @ {targetPos}")
         return selectedTarget, targetPos 
     except:
         print("probably no targs")
@@ -245,8 +261,10 @@ class Bomber(pygame.sprite.Sprite):
         scaled_image = pygame.transform.scale(original_image, (self.scaleX, self.scaleY))
         
         self.initPos = pygame.Vector2(x, y)
-        self.target = targetSelection()[0]
-        self.targetPos = targetSelection()[1]
+        #OOOHHHHH BECAUSE WE NEED TO UNIFY THE TWO SUCH THAT THE TARGET FOR HP AND POS ARE THE SAME woops thats kinda embarassing
+        self.targSelResponse = targetSelection()
+        self.target = self.targSelResponse[0]
+        self.targetPos = self.targSelResponse[1]
         self.spd = spd
         #self.direction = self.targetPos - self.initPos
         #if self.direction.length() != 0:
@@ -357,6 +375,8 @@ while running:
                 upgradeAirbase(airbase = airbase1,cost=3)
             elif event.key == pygame.K_e:
                 upgradeAirbase(airbase = airbase2,cost=3)
+            elif event.key == pygame.K_s:
+                repair(NoradHQ)
 
         #CLICK CHECK - TEMP INTERCEPTOR SPAWN
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -365,13 +385,19 @@ while running:
                 print("click at ", clickPos)
                 
                 if  len([sprite for sprite in sprites if sprite.id == "Bomber"]) > 0: #more than 1 bomber?
-                    if airbase1.rect.collidepoint(clickPos):
+                    if airbase1.rect.collidepoint(clickPos) and airbase1.hp > 0:
                         print("airbase 1 clicked")
-                        spawnInterceptor(airbase1)            
+                        spawnInterceptor(airbase1)    
+                        #hp issue diagnostic
+                        print(f"HP: {airbase1.hp}/{airbase1.MAX_HP} --- PLANES: {airbase1.planesReady}/{airbase1.planeLimit}")        
         
-                    elif  airbase2.rect.collidepoint(clickPos):
+                    if  airbase2.rect.collidepoint(clickPos) and airbase2.hp > 0:
                             print("airbase 2 clicked")
                             spawnInterceptor(airbase2)
+
+                            print(f"HP: {airbase2.hp}/{airbase2.MAX_HP} --- PLANES: {airbase2.planesReady}/{airbase2.planeLimit}")        
+
+
                     else:
                         print("enemy bomber airborne BUT no airbase clicked, no interceptor spawned")
                 
@@ -439,8 +465,10 @@ while running:
                 bomber.target.hp -= 1
                 print(f"new hp of {bomber.target} is {bomber.target.hp}")
                 #killit!!!
-                if bomber.target.hp <= 0:
-                    if bomber.target.id !="Target":
+                
+                #we got a kill
+                if bomber.target.hp <= 0: 
+                    if bomber.target.id !="Target": #deal with airbases - remove for now
                         #hopefully it wasnt main base right?
                         sprites.remove(bomber.target)
                     else:
@@ -506,6 +534,10 @@ while running:
         #    interceptor.shouldRTB = True
             # print("interceptor out of ammo, rtb now")
 
+#maybe i can just directly access it by going
+
+
+        
 #TEXT HANDLING
 # Usage:
     if weJustLost:
@@ -525,6 +557,7 @@ while running:
 
         #TP_surface = font.render(f"RDY: {}", True, text_color)
         #screen.blit(TP_surface, (10, 40))
+
 
 #DONT MESS WITH STUFF BELOW 
     #draw all sprites
