@@ -17,7 +17,7 @@ uiManager = pygame_gui.UIManager((800,600))
 
 
 #UI CONSTS
-LIGHT_GREY = (131,131,131)
+LIGHT_GREY = (120,120,120)
 MID_GREY = (41,41,41)
 DARK_GREY = (20,20,20)
 GREEN = (0,255,0)
