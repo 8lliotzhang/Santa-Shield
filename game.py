@@ -1,7 +1,10 @@
 import pygame
+import pygame_gui
+
 import random
 import math
 import time
+
 import threading
 
 pygame.init()
@@ -10,22 +13,44 @@ pygame.font.init()
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("SANTA SHIELD")
 
+uiManager = pygame_gui.UIManager((800,600))
+
+
+#UI CONSTS
+LIGHT_GREY = (131,131,131)
+MID_GREY = (41,41,41)
+DARK_GREY = (20,20,20)
+GREEN = (0,255,0)
+WHITE = (255,255,255)
+
+BORDER_WIDTH = 3
 
 #bg init? is there a better way
 #offset
 mapX, mapY = (20, 40)
 
-bg = pygame.image.load("imgs/newmap.png")
-bgScaleFactor = 2.5
+bg = pygame.image.load("imgs/newmap2.png")
+bgScaleFactor = 1.25 #umm woops! accidentally scaled down map :( 
 bgScaleX = bg.get_width() * bgScaleFactor
 bgScaleY = bg.get_height() * bgScaleFactor
 bg = pygame.transform.scale(bg,(bgScaleX,bgScaleY))
 
 bgRect = bg.get_rect()
-pygame.draw.rect(bg, (0,255,0), bgRect, 2)
+pygame.draw.rect(bg, (MID_GREY), bgRect, BORDER_WIDTH)
 
 font = pygame.font.SysFont("monospace", 16)
-text_color = (255,255,255)
+
+#UI DEFINITIONS
+UI_RECT_width = 240
+UI_RECT_height = 125
+
+uiRect1 = pygame.Rect(540,40,UI_RECT_width,UI_RECT_height)
+uiRect2 = pygame.Rect(540,190,UI_RECT_width,UI_RECT_height)
+uiRect3 = pygame.Rect(540,340,UI_RECT_width,UI_RECT_height)
+
+
+#maybe create a uiSurface which can just be blitted instead??
+
 
 ICON = pygame.image.load("imgs/santashield2.png")
 pygame.display.set_icon(ICON)
@@ -335,17 +360,21 @@ def newBomber():
         print("new bomber!!")
     except:
         print("eh, prob no targs")
-#
+
 # END BOMBER STUFF ABOVE
 #
+
+#ok, init vars
+
+
 #wave control variables
 waveNumber = 0
 planeDelay = 1.5  # seconds between planes in a wave
 waveDelay = 10 # seconds between waves
-
+#tacpoints
 global tacPoints 
 tacPoints = 0
-
+#we did not just lose, were just starting
 weJustLost = False
 
 
@@ -353,8 +382,78 @@ weJustLost = False
 #--------------------
 #BEGIN RUN!!!!
 
+def drawLiterallyAllUI():
+    pygame.draw.rect(screen, DARK_GREY, uiRect1)
+    pygame.draw.rect(screen, MID_GREY, uiRect1, BORDER_WIDTH)    
+
+    pygame.draw.rect(screen, DARK_GREY, uiRect2)
+    pygame.draw.rect(screen, MID_GREY, uiRect2, BORDER_WIDTH)  
+
+    pygame.draw.rect(screen, DARK_GREY, uiRect3)
+    pygame.draw.rect(screen, MID_GREY, uiRect3, BORDER_WIDTH)    
+    
+    ab1 = font.render("MCCHORD AFB", True, GREEN)
+    ab1P = font.render(f"[q] - PLANES: {airbase1.planesReady}/{airbase1.planeLimit}",True,GREEN)
+    ab1Hp = font.render(f"[a] - HP: {airbase1.hp}/{airbase1.MAX_HP}",True,GREEN)
+    
+    ab2 = font.render("CFB COLD LAKE", True, GREEN)
+    ab2P = font.render(f"[e] - PLANES: {airbase2.planesReady}/{airbase2.planeLimit}",True,GREEN)
+    ab2Hp = font.render(f"[d] - HP: {airbase2.hp}/{airbase2.MAX_HP}", True, GREEN)
+
+    hq = font.render("NORAD HQ", True, GREEN)
+    hqHp = font.render(f"HP: {NoradHQ.hp}/{NoradHQ.MAX_HP}", True, GREEN)
+
+    #texts must blit one by one.
+    screen.blit(ab1, (550,50))
+    screen.blit(ab1Hp, (550,90))
+    screen.blit(ab1P, (550,70))
+    screen.blit(ab2,(550,200))
+    screen.blit(ab2Hp,(550,240))
+    screen.blit(ab2P, (550,220))
+    screen.blit(hq, (550, 350))
+    screen.blit(hqHp, (550, 370))
+
 running = True
 while running:
+    screen.fill((LIGHT_GREY))
+    
+    #bg image of canada
+    screen.blit(bg, (mapX,mapY))
+
+    if not hasSetUpHQAndBases:
+            NoradHQ = Target(
+                x = 250, 
+                y = 400, 
+                hp = 5, 
+                scale = 1)
+            sprites.add(NoradHQ)
+            
+            #oh this is actually really bad... uhh the targetX, Y are about 50 lines up.
+            #airbase init
+            abScale = 0.7
+            
+            airbase1 = Airbase(
+                x = 150, 
+                y = 320,
+                scale = abScale, 
+                planeLimit = 2,
+                hp = 3
+            )
+            airbase2 = Airbase(
+                x = 250, 
+                y = 300,
+                scale = abScale,
+                planeLimit = 2,
+                hp = 3
+            )
+            sprites.add(airbase1)
+            sprites.add(airbase2)
+            hasSetUpHQAndBases = True
+
+
+
+    drawLiterallyAllUI()
+
     #for time.deltatime
     clock = pygame.time.Clock()
     dt = clock.tick(60) / 1000.0
@@ -375,8 +474,12 @@ while running:
                 upgradeAirbase(airbase = airbase1,cost=3)
             elif event.key == pygame.K_e:
                 upgradeAirbase(airbase = airbase2,cost=3)
-            elif event.key == pygame.K_s:
-                repair(NoradHQ)
+            #elif event.key == pygame.K_s:
+            #    repair(NoradHQ) nope, no repairing hehehehe >:)
+            elif event.key==pygame.K_a:
+                repair(airbase1)
+            elif event.key == pygame.K_d:
+                repair(airbase2)
 
         #CLICK CHECK - TEMP INTERCEPTOR SPAWN
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -406,10 +509,7 @@ while running:
   
     #here begins the while running step of the code.
     #a black bg
-    screen.fill((0,0,0))
-    
-    #bg image of canada
-    screen.blit(bg, (mapX,mapY))
+   #target init
     
     # Start the wave spawner thread only once
     if not pygame.wave_thread_started:
@@ -417,37 +517,7 @@ while running:
         wave_thread.start()
         pygame.wave_thread_started = True
 
-    #target init
-    if not hasSetUpHQAndBases:
-        NoradHQ = Target(
-            x = 250, 
-            y = 400, 
-            hp = 5, 
-            scale = 1)
-        sprites.add(NoradHQ)
-        
-        #oh this is actually really bad... uhh the targetX, Y are about 50 lines up.
-        #airbase init
-        abScale = 0.7
-        
-        airbase1 = Airbase(
-            x = 150, 
-            y = 320,
-            scale = abScale, 
-            planeLimit = 2,
-            hp = 3
-        )
-        airbase2 = Airbase(
-            x = 250, 
-            y = 300,
-            scale = abScale,
-            planeLimit = 2,
-            hp = 3
-        )
-        sprites.add(airbase1)
-        sprites.add(airbase2)
-        hasSetUpHQAndBases = True
-
+  
 #bomber move towards hq
     for bomber in sprites:
         if bomber.id == "Bomber":
@@ -542,16 +612,16 @@ while running:
 # Usage:
     if weJustLost:
         text_surface = font.render(
-            f"you survived {waveNumber} waves. Press any button to restart", True, text_color
+            f"You survived {waveNumber} waves. Press any button to play again!", True, WHITE
             )
         # temp skip
-        screen.blit(text_surface, (10, 10))
+        screen.blit(text_surface, (20, 20))
 
     else:
     # Display wave count and mouse position
         mouse_x, mouse_y = pygame.mouse.get_pos()
         text_surface = font.render(
-            f"WAVE {waveNumber} -- MOUSE AT ({mouse_x},{mouse_y}) -- {tacPoints} TP ", True, text_color
+            f"WAVE {waveNumber} -- MOUSE AT ({mouse_x},{mouse_y}) -- {tacPoints} TP ", True, WHITE
             )
         screen.blit(text_surface, (20, 20))
 
@@ -562,7 +632,7 @@ while running:
 #DONT MESS WITH STUFF BELOW 
     #draw all sprites
     sprites.draw(screen)
-    
+
     #update everything
     pygame.display.flip()
 
