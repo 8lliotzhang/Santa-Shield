@@ -37,15 +37,16 @@ TODO - game loop currently doesn't exist. Not really much of a game right now.
 #### Aug 06 - v0.0.3 - 'Republic'
 - finally fixed rotations for the last time. fingers crossed! knock on wood!
 - fixed(?) the game not checking for mouse clicks when bomber spawn loop running? something weird was happening, I made a change, something weird stopped happening. 
--  number of interceptors in air now limited to 2 from each base.
+- number of interceptors in air now limited to 2 from each base.
 ---
-TODO - upgrade bases: +1 max fighter for 3 TP.
-TODO - more randomness in enemy variables
-TODO - airbases as valid military targets 
-TODO - give airbases HP and repair ability
-TODO - fighter turn around time (3s?)
-Fun fact: offscreen I've drafted the UI!
-TODO - implement UI changes (may take awhile) 
+- TODO - upgrade bases: +1 max fighter for 3 TP.
+- TODO - more randomness in enemy variables
+- TODO - airbases as valid military targets 
+- TODO - give airbases HP and repair ability
+- TODO - fighter turn around time (3s?)
+
+- Fun fact: offscreen I've drafted the UI!
+- TODO - implement UI changes (may take awhile) 
 
 ##### Aug 07 - 0.0.3b
 - Bases can now be upgraded for a cost of 3 TP with Q and E keys respectively.
