@@ -87,3 +87,10 @@ TODO - game loop currently doesn't exist. Not really much of a game right now.
 - TODO: barebones, actual UI
 - TODO: add cool sounds here and there
 - TODO: main menu
+
+#### Aug 12 - v0.0.4 'Starfighter'
+- BIG UI changes!! still a really early stage
+- fixed an issue where wave 1 wouldnt spawn due to the targets not acc being inited yet.
+
+- TODO: main menu (with instructions)
+- TODO: sound
