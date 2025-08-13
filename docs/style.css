@@ -12,14 +12,18 @@ body{
     background-color: lightslategrey;
 }
 
-#topbanner{
+#topbanner {
   color: #f2f2f2;
   background-color: #212938;
   position: sticky;
   top: 0;
-  margin: 0%;
-  padding:10px;
-  width: max-content;
+  margin: 0;       /* Remove default margins */
+  padding: 10px;
+  width: 100%;     /* Full width */
   display: flex;
+  box-sizing: border-box; /* Include padding in width calculation */
+  justify-content: center; /* Centers flex items */
+
+
 
 }
