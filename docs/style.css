@@ -5,12 +5,13 @@ body{
 #introdiv{
 
     padding: 10 px;
+    margin: 10 px;
     background-color: lightslategrey;
 }
 
 #topbanner{
     width: 100%;
-    padding: 20 px;
+    margin: 20 px;
     background-color: #292929;
     color:rgb(58, 194, 58)
 
