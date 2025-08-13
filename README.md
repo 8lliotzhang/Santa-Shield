@@ -97,3 +97,7 @@ TODO - game loop currently doesn't exist. Not really much of a game right now.
 
 ##### Aug 12 - v0.0.4a
 - PyInstaller thing works now! download for mac available!!
+
+##### Aug 12 - v0.0.4b
+- scanline effect?
+- attempt to rebuild, with fixing space-on-restart crash bug

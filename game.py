@@ -1,5 +1,4 @@
 import pygame
-import pygame_gui
 
 import random
 import math
@@ -18,15 +17,16 @@ def path(relative):
 
     return os.path.join(base_path, relative)
 
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
 
 
 pygame.init()
 pygame.font.init()
 #screen and title here
-screen = pygame.display.set_mode((800, 600))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("SANTA SHIELD")
 
-uiManager = pygame_gui.UIManager((800,600))
 
 
 #UI CONSTS
@@ -60,6 +60,13 @@ UI_RECT_height = 125
 uiRect1 = pygame.Rect(540,40,UI_RECT_width,UI_RECT_height)
 uiRect2 = pygame.Rect(540,190,UI_RECT_width,UI_RECT_height)
 uiRect3 = pygame.Rect(540,340,UI_RECT_width,UI_RECT_height)
+
+scanline_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)).convert_alpha()
+scanline_surface.fill((0, 0, 0, 0)) # Start fully transparent
+
+# Draw semi-transparent black lines
+for y in range(0, SCREEN_HEIGHT, 2): # Draw a line every 2 pixels
+    pygame.draw.line(scanline_surface, (0, 0, 0, 128), (0, y), (SCREEN_WIDTH, y))
 
 
 #maybe create a uiSurface which can just be blitted instead??
@@ -490,7 +497,8 @@ while running:
                 print("game reset!")
             #TEMP BOMBER SPAWN
             if event.key == pygame.K_SPACE:
-               newBomber()
+               if hasSetUpHQAndBases:
+                    newBomber()
             elif event.key ==pygame.K_q:
                 upgradeAirbase(airbase = airbase1,cost=3)
             elif event.key == pygame.K_e:
@@ -646,6 +654,8 @@ while running:
 #DONT MESS WITH STUFF BELOW 
     #draw all sprites
     sprites.draw(screen)
+
+    screen.blit(scanline_surface, (0,0))
 
     #update everything
     pygame.display.flip()
