@@ -10,9 +10,12 @@ body{
 }
 
 #topbanner{
-    width: 100%;
-    padding: 20px;
-    background-color: #292929;
-    color:rgb(58, 194, 58)
+  background-color: #212938;
+  position: sticky;
+  top: 0;
+  margin: 0%;
+  padding:10px;
+  width: max-content;
+  display: flex;
 
 }
