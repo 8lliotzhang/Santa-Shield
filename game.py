@@ -7,6 +7,19 @@ import time
 
 import threading
 
+import os
+import sys
+
+def path(relative):
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative)
+
+
+
 pygame.init()
 pygame.font.init()
 #screen and title here
@@ -29,7 +42,7 @@ BORDER_WIDTH = 3
 #offset
 mapX, mapY = (20, 40)
 
-bg = pygame.image.load("imgs/newmap2.png")
+bg = pygame.image.load(path("imgs/newmap2.png"))
 bgScaleFactor = 1.25 #umm woops! accidentally scaled down map :( 
 bgScaleX = bg.get_width() * bgScaleFactor
 bgScaleY = bg.get_height() * bgScaleFactor
@@ -52,7 +65,7 @@ uiRect3 = pygame.Rect(540,340,UI_RECT_width,UI_RECT_height)
 #maybe create a uiSurface which can just be blitted instead??
 
 
-ICON = pygame.image.load("imgs/santashield2.png")
+ICON = pygame.image.load(path("imgs/santashield2.png"))
 pygame.display.set_icon(ICON)
 
 #reset vars
@@ -88,7 +101,7 @@ def reset_game():
 class Target(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, hp):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("imgs/city.png")
+        self.image = pygame.image.load(path("imgs/city.png"))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -111,7 +124,7 @@ targetY = 400
 class Airbase(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, hp, planeLimit):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("imgs/airbase.png")
+        self.image = pygame.image.load(path("imgs/airbase.png"))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -152,7 +165,7 @@ class Interceptor(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, spd, base, ammo):
         pygame.sprite.Sprite.__init__(self)
         #image and transforming
-        self.original_image = pygame.image.load("imgs/hornet2-1.png").convert_alpha()
+        self.original_image = pygame.image.load(path("imgs/hornet2-1.png")).convert_alpha()
         self.scaleX = int(scale * self.original_image.get_width())
         self.scaleY = int(scale * self.original_image.get_height())
         self.original_image = pygame.transform.scale(self.original_image, (self.scaleX, self.scaleY))
@@ -280,7 +293,7 @@ class Bomber(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         
         # img setup and scale
-        original_image = pygame.image.load("imgs/sleigh3.png").convert_alpha()
+        original_image = pygame.image.load(path("imgs/sleigh3.png")).convert_alpha()
         self.scaleX = int(scaleX * original_image.get_width())
         self.scaleY = int(scaleY * original_image.get_height())
         scaled_image = pygame.transform.scale(original_image, (self.scaleX, self.scaleY))
@@ -347,7 +360,7 @@ bomberSpd = 50
 
 #create the bomber
 def newBomber():
-    try:
+    #try:
         newBomber = Bomber (
             x = randomBombX(), 
             y = bombSpawnY, 
@@ -358,8 +371,8 @@ def newBomber():
         sprites.add(newBomber)
         sprites.update()
         print("new bomber!!")
-    except:
-        print("eh, prob no targs")
+    #except:
+    #    print("eh, prob no targs")
 
 # END BOMBER STUFF ABOVE
 #
@@ -415,11 +428,12 @@ def drawLiterallyAllUI():
 
 running = True
 while running:
+    #fill screen
     screen.fill((LIGHT_GREY))
     
     #bg image of canada
     screen.blit(bg, (mapX,mapY))
-
+    #
     if not hasSetUpHQAndBases:
             NoradHQ = Target(
                 x = 250, 
@@ -449,9 +463,16 @@ while running:
             sprites.add(airbase1)
             sprites.add(airbase2)
             hasSetUpHQAndBases = True
+        
+            # Start the wave spawner thread only once
+    
+    if not pygame.wave_thread_started:
+        wave_thread = threading.Thread(target=bomber_wave_spawner, daemon=True)
+        wave_thread.start()
+        pygame.wave_thread_started = True
 
 
-
+    #update all ai always
     drawLiterallyAllUI()
 
     #for time.deltatime
@@ -511,13 +532,6 @@ while running:
     #a black bg
    #target init
     
-    # Start the wave spawner thread only once
-    if not pygame.wave_thread_started:
-        wave_thread = threading.Thread(target=bomber_wave_spawner, daemon=True)
-        wave_thread.start()
-        pygame.wave_thread_started = True
-
-  
 #bomber move towards hq
     for bomber in sprites:
         if bomber.id == "Bomber":
@@ -545,7 +559,7 @@ while running:
                         #oh no!!! It was main base!!!
                         print("you dead man!")
                         weJustLost = True
-                        bomber.target.image = pygame.image.load("imgs/bombedcity.png")
+                        bomber.target.image = pygame.image.load(path("imgs/bombedcity.png"))
 
                 sprites.remove(bomber)
            

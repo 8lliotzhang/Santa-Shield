@@ -94,3 +94,6 @@ TODO - game loop currently doesn't exist. Not really much of a game right now.
 
 - TODO: main menu (with instructions)
 - TODO: sound
+
+##### Aug 12 - v0.0.4a
+- PyInstaller thing works now! download for mac available!!
